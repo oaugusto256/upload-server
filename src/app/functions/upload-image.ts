@@ -12,7 +12,7 @@ const uploadImageInput = z.object({
   contentStream: z.instanceof(Readable),
 });
 
-type UploadImageInput = z.infer<typeof uploadImageInput>;
+type UploadImageInput = z.input<typeof uploadImageInput>;
 
 const allowedMimeTypes = ["image/jpg", "image/jpeg", "image/png", "image/webp"];
 
