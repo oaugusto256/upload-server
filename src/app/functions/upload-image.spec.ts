@@ -1,11 +1,12 @@
 import { db } from "@/infra/db";
 import { schemas } from "@/infra/db/schemas";
-import { isRight } from "@/shared/either";
+import { isLeft, isRight, unwrapEither } from "@/shared/either";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 import { Readable } from "node:stream";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { InvalidFileFormat } from "./errors/invalid-file-format";
 import { uploadImage } from "./upload-image";
 
 describe("Upload image", () => {
@@ -41,5 +42,18 @@ describe("Upload image", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe(fileName);
+  });
+
+  it("should not be able to upload an invalid file", async () => {
+    const fileName = `${randomUUID()}.pdf`;
+
+    const sut = await uploadImage({
+      fileName,
+      contentType: "document/pdf",
+      contentStream: Readable.from([]),
+    });
+
+    expect(isLeft(sut)).toBe(true);
+    expect(unwrapEither(sut)).toBeInstanceOf(InvalidFileFormat);
   });
 });
